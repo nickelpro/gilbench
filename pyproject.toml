@@ -1,0 +1,42 @@
+[project]
+name = "balmbench"
+version = "1.0.0"
+description = "GIL Balming Benchmark"
+readme = "ReadMe.md"
+requires-python = ">=3.12"
+license = { "file" = "License" }
+authors = [{ "name" = "Vito Gamberini", "email" = "vito@gamberini.email" }]
+keywords = ["Benchmark"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS",
+]
+urls = { "Documentation" = "https://blog.vito.nyc/posts/gil-balm" }
+dependencies = []
+
+[build-system]
+requires = ["py-build-cmake~=0.2.0a9"]
+build-backend = "py_build_cmake.build"
+
+[tool.py-build-cmake.module]
+generated = "module"
+
+[tool.py-build-cmake.sdist]
+include = ["CMakeLists.txt", "vcpkg.json", "src/*"]
+
+[tool.py-build-cmake.cmake]
+minimum_version = "3.17"
+build_type = "Release"
+build_args = ["-j"]
+
+[tool.py-build-cmake.windows.cmake]
+args = ["-T", "ClangCL"]
+
+[tool.py-build-cmake.windows.cmake.options]
+"VCPKG_TARGET_TRIPLET:STRING" = "x64-windows-static"
+"CMAKE_MSVC_RUNTIME_LIBRARY:STRING" = "MultiThreaded"

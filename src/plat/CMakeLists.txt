@@ -1,0 +1,5 @@
+if(WIN32)
+  target_sources(balmbench PRIVATE windows.c)
+else()
+  target_sources(balmbench PRIVATE nix.c)
+endif()
