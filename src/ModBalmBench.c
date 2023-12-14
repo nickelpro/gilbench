@@ -75,9 +75,32 @@ static PyObject* bench_balm(PyObject* self, PyObject* const* args,
   PyThreadState* state = PyEval_SaveThread();
   PyObject* tpl = run_balm_bench(rd);
   PyEval_RestoreThread(state);
-
+  rd->ref_count += PyTuple_GET_SIZE(tpl);
   return tpl;
 }
+
+static PyObject* bench_balmblock(PyObject* self, PyObject* const* args,
+    Py_ssize_t nargs, PyObject* kwnames) {
+  static const char* _keywords[] = {"rd", NULL};
+  static _PyArg_Parser _parser = {.keywords = _keywords,
+      .format = "O:bench_balmblock"};
+
+  PyObject* rd_capsule;
+
+  if(!_PyArg_ParseStackAndKeywords(args, nargs, kwnames, &_parser, &rd_capsule))
+    return NULL;
+
+  RefCountedData* rd = PyCapsule_GetPointer(rd_capsule, cap_name);
+  if(!rd)
+    return NULL;
+
+  PyThreadState* state = PyEval_SaveThread();
+  PyObject* tpl = run_balmblock_bench(rd);
+  PyEval_RestoreThread(state);
+  rd->ref_count += PyTuple_GET_SIZE(tpl);
+  return tpl;
+}
+
 
 static PyObject* bench_cpy(PyObject* self, PyObject* const* args,
     Py_ssize_t nargs, PyObject* kwnames) {
@@ -100,6 +123,8 @@ static PyObject* bench_cpy(PyObject* self, PyObject* const* args,
 static PyMethodDef BalmBenchMethods[] = {
     {"read_file", (PyCFunction) read_file, METH_FASTCALL | METH_KEYWORDS},
     {"bench_balm", (PyCFunction) bench_balm, METH_FASTCALL | METH_KEYWORDS},
+    {"bench_balmblock", (PyCFunction) bench_balmblock,
+        METH_FASTCALL | METH_KEYWORDS},
     {"bench_cpy", (PyCFunction) bench_cpy, METH_FASTCALL | METH_KEYWORDS},
     {0},
 };

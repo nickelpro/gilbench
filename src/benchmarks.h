@@ -9,6 +9,7 @@
 #include "Balm.h"
 
 Py_LOCAL_SYMBOL PyObject* run_balm_bench(RefCountedData* rd);
+Py_LOCAL_SYMBOL PyObject* run_balmblock_bench(RefCountedData* rd);
 Py_LOCAL_SYMBOL PyObject* run_cpy_bench(RefCountedData* rd);
 
 #endif // BALM_BENCHMARKS_H

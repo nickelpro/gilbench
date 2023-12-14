@@ -5,22 +5,23 @@ import balmbench
 data = balmbench.read_file("mobydick.bin")
 
 
-def balm(loops=1000):
+def balmblock(loops=10000):
+  for _ in repeat(None, loops):
+    balmbench.bench_balmblock(data)
+
+
+def balm(loops=10000):
   for _ in repeat(None, loops):
     balmbench.bench_balm(data)
 
 
-def cpy(loops=1000):
+def cpy(loops=10000):
   for _ in repeat(None, loops):
     balmbench.bench_cpy(data)
 
 
-def setup_threads(f):
-  threads = []
-  for _ in repeat(None, 8):
-    threads.append(threading.Thread(target=lambda: f(62)))
-    threads.append(threading.Thread(target=lambda: f(63)))
-  return threads
+def make_pool(f):
+  return [threading.Thread(target=lambda: f(625)) for _ in repeat(None, 16)]
 
 
 def threaded(threads):
@@ -31,5 +32,10 @@ def threaded(threads):
 
 
 __benchmarks__ = [
-    (cpy, balm, "Use balm strings instead of regular PyUnicode objects"),
+    (cpy, lambda: threaded(balmblock), "cpy vs th_balmblock"),
+    (balmblock, balm, "balmblock vs balm"),
+    (cpy, balm, "cpy vs balm"),
+    (cpy, balmblock, "cpy vs balmblock"),
+    (lambda: threaded(cpy), lambda: threaded(balmblock),
+     "th_cpy vs th_balmblock"),
 ]

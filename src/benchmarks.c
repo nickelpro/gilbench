@@ -6,6 +6,27 @@
 #include "Balm.h"
 #include "benchmarks.h"
 
+Py_LOCAL_SYMBOL PyObject* run_balmblock_bench(RefCountedData* rd) {
+
+  uint16_t* header_cur = (uint16_t*) rd->data;
+  uint16_t entries = *header_cur;
+  uint16_t* end = ++header_cur + entries;
+  char* data_cur = (char*) end;
+
+  BalmStrBlock* blk = New_BalmStringBlock(entries);
+  BalmTuple* tpl = New_BalmTuple(entries);
+
+
+  for(Py_ssize_t i = 0; header_cur < end; ++header_cur, ++i) {
+    uint16_t len = *header_cur;
+    BalmString* str = Get_BalmStringFromBlock(blk, i, rd, data_cur, len);
+    str->ob_base.ob_refcnt = 1;
+    PyTuple_SET_ITEM(tpl, i, str);
+    data_cur += len;
+  }
+
+  return (PyObject*) tpl;
+}
 
 Py_LOCAL_SYMBOL PyObject* run_balm_bench(RefCountedData* rd) {
 
