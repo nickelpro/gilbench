@@ -81,8 +81,6 @@ Py_LOCAL_SYMBOL BalmString* New_BalmStringView(RefCountedData* rd, char* data,
 
 Py_LOCAL_SYMBOL BalmTuple* New_BalmTuple(size_t len);
 
-Py_LOCAL_SYMBOL BalmString* New_BlockBalmStringView(RefCountedData);
-
 Py_LOCAL_SYMBOL BalmStrBlock* New_BalmStringBlock(size_t len);
 Py_LOCAL_SYMBOL BalmString* Get_BalmStringFromBlock(BalmStrBlock* blk,
     size_t index, RefCountedData* rd, char* data, size_t len);

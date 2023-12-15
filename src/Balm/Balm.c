@@ -66,7 +66,15 @@ static BalmStringNode* balmstr_block_alloc(size_t len) {
   for(BalmStringNode* v = base; v < base + len; ++v) {
     v->next = prev;
     prev = v;
-    v->str = (BalmString) {.state = {.kind = PyUnicode_1BYTE_KIND, .ascii = 1}};
+    // clang-format off
+    v->str = (BalmString) {
+        .ob_base.ob_type = &BalmString_Type,
+        .state = {
+            .kind = PyUnicode_1BYTE_KIND,
+            .ascii = 1,
+        },
+    };
+    // clang-format on
   }
   return prev;
 }
@@ -188,9 +196,8 @@ static void balmstrblock_dealloc(PyObject* str) {
 
   BalmBlockNode* node = GET_BLKNODE_BLK(blk);
 
-  if(!(--blk->ref_count)) {
+  if(!(--blk->ref_count))
     balmblock_push(&pools.blocks, node);
-  }
 }
 
 static void balmtpl_dealloc(PyObject* tpl) {
@@ -230,7 +237,6 @@ Py_LOCAL_SYMBOL BalmString* New_BalmString(size_t len) {
   BalmString* str = balmstr_pop(&pools.bigviews, balmstr_block_alloc,
       BALM_STRING_ALLOCATION_BLOCK_SIZE);
   string_view(str, rd, rd->data, len);
-  str->ob_base.ob_type = &BalmString_Type;
   str->state.balm = BALM_STRING_BIG;
   return str;
 }
@@ -240,7 +246,6 @@ Py_LOCAL_SYMBOL BalmString* New_BalmStringView(RefCountedData* rd, char* data,
   BalmString* str = balmstr_pop(&pools.bigviews, balmstr_block_alloc,
       BALM_STRING_ALLOCATION_BLOCK_SIZE);
   string_view(str, rd, data, len);
-  str->ob_base.ob_type = &BalmString_Type;
   str->state.balm = BALM_STRING_VIEW;
   return str;
 }
@@ -295,6 +300,11 @@ static void init_tplpool(TuplePool* pool, BalmTupleNode* (*alloc)(size_t)) {
   pool->head = alloc(BALM_TUPLE_ALLOCATION_BLOCK_SIZE);
 }
 
+static void init_blkpool(BlockPool* pool) {
+  mtx_init(&pool->lock, mtx_plain);
+  pool->head = NULL;
+}
+
 Py_LOCAL_SYMBOL void balm_init() {
   BalmString_Type = PyUnicode_Type;
   BalmString_Type.tp_new = NULL;
@@ -318,4 +328,5 @@ Py_LOCAL_SYMBOL void balm_init() {
   init_strpool(&pools.bigviews, balmstr_block_alloc);
   init_strpool(&pools.compacts, compactbalmstr_block_alloc);
   init_tplpool(&pools.tuples, balmtpl_block_alloc);
+  init_blkpool(&pools.blocks);
 }
